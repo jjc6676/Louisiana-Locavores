@@ -1,70 +1,55 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { removeFromCart, updateCartItem } from '../../store/actions/cartActions';
-class CartItem extends Component {
-  constructor(props) {
-    super(props);
+import React, { useState } from 'react';
 
-    this.handleUpdateCartItem = this.handleUpdateCartItem.bind(this);
-    this.handleRemoveFromCart = this.handleRemoveFromCart.bind(this);
-  }
+import AdjustItem from '../AdjustItem';
+import CurrencyFormatter from '../CurrencyFormatter';
+import Drawer from '../Drawer';
+import RemoveItem from '../RemoveItem';
+import QuickView from '../QuickView';
 
-  /**
-   * Update cart item
-   */
-  handleUpdateCartItem(lineItem, quantity) {
-    this.props.dispatch(updateCartItem(lineItem, quantity));
-  }
+import * as styles from './CartItem.module.css';
+import { navigate } from 'gatsby';
 
-  /**
-   * Remove item from cart
-   */
-  handleRemoveFromCart(lineItem) {
-    this.props.dispatch(removeFromCart(lineItem));
-  }
+const CartItem = (props) => {
+  const [showQuickView, setShowQuickView] = useState(false);
+  const { image, alt, color, name, size, price } = props;
 
-  render() {
-    const { item } = this.props;
-    return (
-      <div className="px-4 px-md-5 mb-2">
-        <div className="cart-item d-flex">
-          <div
-            className="cart-item--image mr-4"
-            style={% raw %}{{ backgroundImage: `url("${item.media.source}")` }}{% endraw %}
-          ></div>
-          <div className="flex-grow-1 borderbottom border-color-gray400 h-100">
-            <div className="d-flex justify-content-between mb-2">
-              <p>{item.name}</p>
-              <p className="text-right font-weight-medium">
-                ${item.line_total.formatted_with_symbol}
-              </p>
-            </div>
-            <div className="d-flex justify-content-between mb-2">
-              {item.variants.map((variant, i) =>
-                <p key={i} className="font-color-light font-weight-small">
-                  {variant.variant_name}: {variant.option_name}
-                </p>
-              )}
-            </div>
-            <div className="d-flex align-items-center justify-content-between pt-2 pb-4">
-              <div className="d-flex align-items-center">
-                <button className="p-0 bg-transparent" onClick={() => item.quantity > 1 ? this.handleUpdateCartItem(item.id, item.quantity -1) : this.handleRemoveFromCart(item.id)}>
-                  <img src="/icon/minus.svg" className="w-16" alt="Minus icon"/>
-                </button>
-                <p className="text-center px-3">{item.quantity}</p>
-                <button className="p-0 bg-transparent" onClick={() => this.handleUpdateCartItem(item.id, item.quantity +1)} >
-                  <img src="/icon/plus.svg" className="w-16" alt="Plus icon"/>
-                </button>
-              </div>
-              <p className="text-right text-decoration-underline font-color-medium cursor-pointer" onClick={() => this.handleRemoveFromCart(item.id)}>
-                Remove
-              </p>
-            </div>
-          </div>
+  return (
+    <div className={styles.root}>
+      <div
+        className={styles.imageContainer}
+        role={'presentation'}
+        onClick={() => navigate('/product/sample')}
+      >
+        <img src={image} alt={alt}></img>
+      </div>
+      <div className={styles.itemContainer}>
+        <span className={styles.name}>{name}</span>
+        <div className={styles.metaContainer}>
+          <span>Color: {color}</span>
+          <span>Size: {size}</span>
         </div>
+        <div
+          className={styles.editContainer}
+          role={'presentation'}
+          onClick={() => setShowQuickView(true)}
+        >
+          <span>Edit</span>
+        </div>
+      </div>
+      <div className={styles.adjustItemContainer}>
+        <AdjustItem />
+      </div>
+      <div className={styles.priceContainer}>
+        <CurrencyFormatter amount={price} appendZero />
+      </div>
+      <div className={styles.removeContainer}>
+        <RemoveItem />
+      </div>
+      <Drawer visible={showQuickView} close={() => setShowQuickView(false)}>
+        <QuickView close={() => setShowQuickView(false)} />
+      </Drawer>
     </div>
-  )
-  }
-}
+  );
+};
 
-export default connect(state => state)(CartItem);
+export default CartItem;
